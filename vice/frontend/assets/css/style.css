@@ -423,6 +423,12 @@ img {
   height: auto;
 }
 
+footer {
+  margin-top: 10px;
+  border-top: 1px solid #e1e3d7;
+  border-bottom: 1px solid #e1e3d7;
+}
+
 .menu-top ul li {
   width: 19%;
 }
@@ -463,7 +469,6 @@ img {
 
   .copyright {
     height: 50px;
-    border-top: 1px solid #e1e3d7;
     text-align: center;
   }
 
@@ -472,6 +477,10 @@ img {
     position: relative;
     top: 50%;
     transform: translateY(-50%);
+  }
+
+  .menu-bottom {
+    border: none;
   }
 }
 /* End Mobile Styles */
@@ -509,8 +518,6 @@ img {
 
   .copyright {
     height: 40px;
-    margin-top: 10px;
-    border-top: 1px solid #e1e3d7;
     text-align: center;
   }
 
@@ -524,7 +531,65 @@ img {
 /* End Tablet Styles */
 /* Begin Desktop Styles */
 @media screen and (min-width: 1001px) {
+  .content {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+  }
 
+  body {
+    font-size: 83%;
+  }
+
+  nav ul li {
+    height: 40px;
+  }
+
+  nav.menu-bottom {
+    border: 0;
+  }
+
+  footer {
+    margin-top: 20px;
+  }
+
+  .brand {
+    text-align: center;
+  }
+
+  .main ul {
+    text-align: center;
+  }
+
+  .main ul li {
+    display: inline-block;
+    width: 23%;
+    margin-top: 20px;
+  }
+
+  .main ul li:nth-child(4n+2), .main ul li:nth-child(4n+3), .main ul li:nth-child(4n+4) {
+    margin-left: 20px;
+  }
+
+  .copyright {
+    height: 40px;
+    text-align: center;
+    float: left;
+    width: 50%;
+  }
+
+  .copyright span {
+    display: block;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .menu-bottom {
+    width: 50%;
+    float: left;
+  }
 }
 /* End Desktop Styles */
 /* Begin Tidy 320 */
