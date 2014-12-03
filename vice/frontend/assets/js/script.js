@@ -1,53 +1,44 @@
-// first a small helper from here; http://davidwalsh.name/css-animation-callback;
-function whichTransitionEvent(){
-  var t;
-  var el = document.createElement('fakeelement');
-  var transitions = {
-    'transition':'transitionend',
-    'OTransition':'oTransitionEnd',
-    'MozTransition':'transitionend',
-    'WebkitTransition':'webkitTransitionEnd'
-  }
-
-  for(t in transitions){
-    if( el.style[t] !== undefined ){
-      return transitions[t];
-    }
-  }
-}
-
-// begin lightbox code
 (function() {
   "use strict";
 
-  var LightBox = function() {
+  var LightBox = function(imgs) {
     var self = this;
 
-    self.fadeIn = '.25s';
+    self.imgs = imgs;
+    self.transitionDuration = 250;
 
     self.show = function(e) {
-      self.initHtml(this);
-
       document.getElementsByTagName('html')[0].classList.add('noscroll');
       document.getElementsByTagName('body')[0].classList.add('noscroll');
+      self.addHtml(this);
 
       setTimeout(function() {
         document.getElementById('lbox').classList.add('active');
-      }, 0);
+      }, 100);
+
+      document.addEventListener('keydown', self.keyDown);
+      document.getElementById('lbox').addEventListener('click', self.click);
     };
 
     self.hide = function() {
       document.getElementsByTagName('html')[0].classList.remove('noscroll');
       document.getElementsByTagName('body')[0].classList.remove('noscroll');
       document.getElementById('lbox').classList.remove('active');
+
+      document.getElementById('lbox').addEventListener('click', self.click);
+      document.removeEventListener('keydown', self.keyDown);
+
+      setTimeout(self.removeHtml, self.transitionDuration);
     };
 
-    self.initHtml = function(target) {
+    self.addHtml = function(target) {
       var src = target.getAttribute('src'),
-        alt = target.getAttribute('alt');
+        alt = target.getAttribute('alt'),
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
       var el = document.createElement('div');
       el.setAttribute('id', 'lbox');
+      el.setAttribute('style', 'top: ' + scrollTop + ';');
 
       var popup = document.createElement('div');
       popup.classList.add('lbox-popup');
@@ -60,7 +51,6 @@ function whichTransitionEvent(){
       var close = document.createElement('img');
       close.setAttribute('src', 'assets/images/close.png');
       close.classList.add('close');
-      close.onclick = self.hide;
       content.appendChild(close);
 
       var img = document.createElement('img');
@@ -77,41 +67,52 @@ function whichTransitionEvent(){
       h2.appendChild(title);
 
       document.body.appendChild(el);
-
-      self.initListener();
     };
 
-    self.transitionEvent = function(e) {
-      var target = e.target,
-        opacity = getComputedStyle(target, null).getPropertyValue('opacity');
+    self.removeHtml = function() {
+      var lbox = document.getElementById('lbox');
 
-      opacity === '0' && document.getElementById('lbox').parentElement.removeChild(target);
-    };
-
-    self.initListener = function() {
-      var transitionEvent = whichTransitionEvent();
-
-      transitionEvent && document.getElementById('lbox').addEventListener(transitionEvent, self.transitionEvent);
+      lbox.parentElement.removeChild(lbox);
     };
 
     self.initCss = function() {
-      var style = document.createElement("style");
+      var style = document.createElement("style"),
+        innerWidth = window.innerWidth,
+        margin = 20,
+        padding = 16,
+        width = 100 * (innerWidth - (2 * margin)) / innerWidth,
+        maxWidth = 760;
+
       style.appendChild(document.createTextNode(""));
       document.head.appendChild(style);
 
       style.sheet.insertRule(".noscroll {		overflow: hidden;		height: 100%;		}", 0);
-      style.sheet.insertRule("#lbox {		position: absolute;		top: 0;		left: 0;		width: 100%;		height: 100%;		background-color: rgba(0, 0, 0, 0.5);		color: #000;		opacity: 0;		-webkit-transition: opacity " + self.fadeIn + " ease-in-out;		-moz-transition: opacity " + self.fadeIn + " ease-in-out;		-ms-transition: opacity " + self.fadeIn + " ease-in-out;		-o-transition: opacity " + self.fadeIn + " ease-in-out;		transition: opacity " + self.fadeIn + " ease-in-out;		}", 1);
+      style.sheet.insertRule("#lbox {		position: absolute;		top: 0;		left: 0;		width: 100%;		height: 100%;		background-color: rgba(0, 0, 0, 0.5);		color: #000;		opacity: 0;		-webkit-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-moz-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-ms-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-o-transition: opacity " + self.transitionDuration + "ms ease-in-out;		transition: opacity " + self.transitionDuration + "ms ease-in-out;		}", 1);
       style.sheet.insertRule(".active {		opacity: 1.0 !important;		}", 2);
-      style.sheet.insertRule(".lbox-popup {		width: 48%;		background-color: #fff;		margin-left: auto;		margin-right: auto;		padding: 16px;		top: 50%;		position: relative;		transform: translateY(-50%);		border-radius: 20px;		}", 3);
+      style.sheet.insertRule(".lbox-popup {		width: " + width + "%;		max-width: " + maxWidth + "px;		background-color: #fff;		margin-left: auto;		margin-right: auto;		padding: " + padding + "px;		top: 50%;		position: relative;		transform: translateY(-50%);		border-radius: 20px;		}", 3);
       style.sheet.insertRule(".lbox-popup img.close {		position: fixed;		top: -10px;		right: -10px;		cursor: pointer;		}", 4);
       style.sheet.insertRule(".lbox-popup h2 {		margin-bottom: 0;		font-weight: 300;		}", 5);
     };
 
-    self.init = function() {
-      var imgs = document.body.getElementsByTagName('img');
+    self.click = function (e) {
+      var target = e.target;
 
-      for (var i = 0; i < imgs.length; i += 1) {
-        imgs[i].onclick = self.show;
+      if (target.id == 'lbox' || target.className == 'close') {
+        self.hide();
+      }
+    };
+
+    self.keyDown = function (e) {
+      e = e || window.event;
+
+      if (e.keyCode == 27) {
+        self.hide();
+      }
+    };
+
+    self.init = function() {
+      for (var i = 0; i < self.imgs.length; i += 1) {
+        self.imgs[i].onclick = self.show;
       }
 
       self.initCss();
@@ -120,5 +121,7 @@ function whichTransitionEvent(){
     self.init();
   };
 
-  window.lbox = new LightBox();
+  window.LightBox = LightBox;
 }());
+
+window.lbox = new LightBox(document.getElementsByClassName('main')[0].getElementsByTagName('img'));
