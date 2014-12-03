@@ -6,9 +6,9 @@
 
     self.imgs = imgs;
     self.transitionDuration = 250;
+    self.oldScrollTop = null;
 
     self.show = function(e) {
-      document.getElementsByTagName('html')[0].classList.add('noscroll');
       document.getElementsByTagName('body')[0].classList.add('noscroll');
       self.addHtml(this);
 
@@ -21,7 +21,6 @@
     };
 
     self.hide = function() {
-      document.getElementsByTagName('html')[0].classList.remove('noscroll');
       document.getElementsByTagName('body')[0].classList.remove('noscroll');
       document.getElementById('lbox').classList.remove('active');
 
@@ -34,11 +33,18 @@
     self.addHtml = function(target) {
       var src = target.getAttribute('src'),
         alt = target.getAttribute('alt'),
-        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        scrollTop = window.pageYOffset || document.body.scrollTop,
+        innerHeight = window.innerHeight,
+        offsetHeight = document.body.offsetHeight,
+        marginTop = -scrollTop,
+        marginBottom = -(offsetHeight - scrollTop - innerHeight);
+
+      self.oldScrollTop = scrollTop;
+      document.body.setAttribute('style', 'margin-top: ' + marginTop + 'px;   margin-bottom: ' + marginBottom + 'px;');
 
       var el = document.createElement('div');
       el.setAttribute('id', 'lbox');
-      el.setAttribute('style', 'top: ' + scrollTop + ';');
+      el.setAttribute('style', 'top: 0;');
 
       var popup = document.createElement('div');
       popup.classList.add('lbox-popup');
@@ -73,6 +79,11 @@
       var lbox = document.getElementById('lbox');
 
       lbox.parentElement.removeChild(lbox);
+
+      document.body.removeAttribute('style');
+
+      document.body.scrollTop = self.oldScrollTop;
+      window.pageYOffset = self.oldScrollTop;
     };
 
     self.initCss = function() {
@@ -86,7 +97,7 @@
       style.appendChild(document.createTextNode(""));
       document.head.appendChild(style);
 
-      style.sheet.insertRule(".noscroll {		overflow: hidden;		height: 100%;		}", 0);
+      style.sheet.insertRule(".noscroll {		overflow: hidden;		}", 0);
       style.sheet.insertRule("#lbox {		position: absolute;		top: 0;		left: 0;		width: 100%;		height: 100%;		background-color: rgba(0, 0, 0, 0.5);		color: #000;		opacity: 0;		-webkit-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-moz-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-ms-transition: opacity " + self.transitionDuration + "ms ease-in-out;		-o-transition: opacity " + self.transitionDuration + "ms ease-in-out;		transition: opacity " + self.transitionDuration + "ms ease-in-out;		}", 1);
       style.sheet.insertRule(".active {		opacity: 1.0 !important;		}", 2);
       style.sheet.insertRule(".lbox-popup {		width: " + width + "%;		max-width: " + maxWidth + "px;		background-color: #fff;		margin-left: auto;		margin-right: auto;		padding: " + padding + "px;		top: 50%;		position: relative;		transform: translateY(-50%);		border-radius: 20px;		}", 3);
